@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+#by thebigbot0000
+
+yellow='\033[1;33m'
+green='\033[0;32m'
+red='\033[0;31m'
+blue='\033[0;34m'
+gray='\033[1;30m'
+bold='\033[1m'
+reset='\033[0m'
+
+hostname=$(hostnamectl | grep "Static hostname" | awk '{print $3}')
+user=$(whoami)
+os=$(hostnamectl | grep "Operating System" | awk '{print $3}')
+release=$(lsb_release -sr)
+arch=$(uname -m)
+kernel=$(hostnamectl | grep "Kernel" | awk '{print $3}')
+uptimem=$(uptime -p | awk '{print $2}')
+uptimeh=$(uptime -p | awk '{print $4}')
+memory_total=$(free -m | awk '/^Mem:/{print $2}')
+memory_used=$(free -m | awk '/^Mem:/{print $3}')
+bashversion=$(bash --version | grep "bash" | cut -f 4 -d " " | cut -d "-" -f 1 | cut -d "(" -f 1)
+modelname=$(lscpu | grep "Model name" | cut -f 2 -d ":" | sed 's/^[ \t]*//')
+oshomepage=$(cat /etc/os-release | grep "home_url" | cut -f 2 -d "=" -d "\"" | sed 's/^[ \t]*//')
+
+if [ uptimeh ]; then
+	uptimeh="${uptimeh} hours"
+else
+	uptimeh=""
+fi
+
+
+case "$1" in
+"-nc" | "--no-cat")
+    echo -e "
+${yellow}${user}${reset}@${yellow}${hostname}${reset}
+${bold}os${reset}: \e]8;;$oshomepage\a$os\e]8;;\a $release $arch
+${bold}kernel${reset}: $kernel
+${bold}uptime${reset}: $uptimeh hours $uptimem minutes
+${bold}memory${reset}: $memory_used/$memory_total mb
+${bold}bash${reset}: $bashversion
+${bold}cpu${reset}: $modelname
+         
+${green}████${reset}${red}████${reset}${yellow}████${reset}${blue}████${reset}${gray}████${reset}
+"
+    exit 1
+    ;;
+
+"-o" | "--only")
+    p=$2
+    case "$p" in
+    "os")
+        echo -e "${bold}os${reset}: \e]8;;$oshomepage\a$os\e]8;;\a $release $arch"
+        exit 1
+        ;;
+    "kernel")
+        echo -e "${bold}kernel${reset}: $kernel"
+        exit 1
+        ;;
+    "uptime")
+        echo -e "${bold}uptime${reset}: $uptimeh $uptimem minutes"
+        exit 1
+        ;;
+    "memory")
+
+        echo -e "${bold}memory${reset}: $memory_used/$memory_total mb"
+        exit 1
+        ;;
+    "bash")
+        echo -e "${bold}bash${reset}: $bashversion"
+        exit 1
+        ;;
+    "cpu")
+
+        echo -e "${bold}cpu${reset}: $modelname"
+        exit 1
+        ;;
+    *)
+        echo -e "specify a valid option"
+        ;;
+    esac
+    exit 1
+    ;;
+
+*)
+    color=${yellow}
+    echo -e "
+            ${yellow}${user}${reset}@${yellow}${hostname}${reset}
+            ${bold}os${reset}: \e]8;;$oshomepage\a$os\e]8;;\a $release $arch
+  ${yellow}            ,${reset}   ${bold}kernel${reset}: $kernel
+   ${yellow}            |--.__;${reset}  ${bold}uptime${reset}: $uptimeh $uptimem minutes
+  ${yellow}             /    _/${reset}   ${bold}memory${reset}: $memory_used/$memory_total mb
+   ${yellow}           ***** ${reset}   ${bold}bash${reset}: $bashversion  
+            ${bold}cpu${reset}: $modelname
+         
+            ${green}████${reset}${red}████${reset}${yellow}████${reset}${blue}████${reset}${gray}████${reset}"
+
+    exit 1
+    ;;
+esac
